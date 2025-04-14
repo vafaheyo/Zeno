@@ -1,0 +1,162 @@
+-- Создаем ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TradeScamGUI"
+ScreenGui.ResetOnSpawn = false -- Чтобы GUI не исчезал при респавне
+ScreenGui.Parent = game:GetService("CoreGui") -- В Block Fruit GUI добавляется в CoreGui
+
+-- Создаем главный Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 230, 0, 165) -- Уменьшенная ширина и увеличенная высота
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -90) -- Центрируем по экрану
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Белый фон
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+-- Добавляем уголки для главного фрейма
+local MainFrameCorner = Instance.new("UICorner")
+MainFrameCorner.CornerRadius = UDim.new(0, 10) -- Закругление на 10 пикселей
+MainFrameCorner.Parent = MainFrame
+
+-- Добавляем 1-пиксельную границу
+local MainFrameStroke = Instance.new("UIStroke")
+MainFrameStroke.Thickness = 1 -- 1-пиксельная граница
+MainFrameStroke.Color = Color3.fromRGB(80, 80, 80) -- Серый цвет границы
+MainFrameStroke.Parent = MainFrame
+
+-- Добавляем заголовок
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Text = "Trade Scam"
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 24
+TitleLabel.TextColor3 = Color3.fromRGB(0, 0, 0) -- Черный текст
+TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Position = UDim2.new(0, 0, 0, 5) -- Отступ сверху
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Center -- Текст по центру
+TitleLabel.Parent = MainFrame
+
+-- Переменные для Drag-and-Drop
+local dragging = false
+local dragInput, dragStart, startPos
+
+-- Функция для начала перетаскивания
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+-- Обработчик событий для Drag-and-Drop
+TitleLabel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TitleLabel.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+-- Добавляем обработчик для обновления позиции
+game:GetService("RunService").RenderStepped:Connect(function()
+    if dragging and dragInput then
+        updateDrag(dragInput)
+    end
+end)
+
+-- Функция для создания ToggleButton с ползунком
+local function createToggleButton(parent, text, positionY)
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Name = text .. "Toggle"
+    toggleButton.Text = ""
+    toggleButton.Size = UDim2.new(1, -20, 0, 30) -- Увеличенная высота кнопки
+    toggleButton.Position = UDim2.new(0, 10, 0, positionY) -- Увеличенные отступы слева/справа
+    toggleButton.BackgroundColor3 = Color3.fromRGB(240, 240, 240) -- Светло-серая заливка
+    toggleButton.BorderSizePixel = 0
+    toggleButton.Parent = parent
+	toggleButton.AutoButtonColor = false
+
+    -- Добавляем закругленные края для кнопки
+    local ToggleButtonCorner = Instance.new("UICorner")
+    ToggleButtonCorner.CornerRadius = UDim.new(0, 10) -- Закругление на 10 пикселей
+    ToggleButtonCorner.Parent = toggleButton
+
+    -- Текст для описания
+    local descriptionLabel = Instance.new("TextLabel")
+    descriptionLabel.Name = "DescriptionLabel"
+    descriptionLabel.Text = text
+    descriptionLabel.Font = Enum.Font.Gotham
+    descriptionLabel.TextSize = 14 -- Уменьшенный размер текста
+    descriptionLabel.TextColor3 = Color3.fromRGB(0, 0, 0) -- Черный текст
+    descriptionLabel.Size = UDim2.new(0, 150, 1, 0)
+    descriptionLabel.Position = UDim2.new(0, 10, 0, 0) -- Отступ слева
+    descriptionLabel.BackgroundTransparency = 1
+    descriptionLabel.TextXAlignment = Enum.TextXAlignment.Left -- Текст по левому краю
+    descriptionLabel.Parent = toggleButton
+
+    -- Выемка для ползунка
+    local sliderTrack = Instance.new("Frame")
+    sliderTrack.Name = "SliderTrack"
+    sliderTrack.Size = UDim2.new(0, 40, 0, 20)
+    sliderTrack.Position = UDim2.new(1, -50, 0.5, -10) -- Правая сторона
+    sliderTrack.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Белый фон внутри выемки
+    sliderTrack.BorderSizePixel = 0
+    sliderTrack.Parent = toggleButton
+
+    -- Добавляем закругленные края для выемки
+    local SliderTrackCorner = Instance.new("UICorner")
+    SliderTrackCorner.CornerRadius = UDim.new(0, 10) -- Закругление на 10 пикселей
+    SliderTrackCorner.Parent = sliderTrack
+
+    -- Добавляем 1-пиксельную границу
+    local SliderTrackStroke = Instance.new("UIStroke")
+    SliderTrackStroke.Thickness = 1 -- 1-пиксельная граница
+    SliderTrackStroke.Color = Color3.fromRGB(80, 80, 80) -- Серый цвет границы
+    SliderTrackStroke.Parent = sliderTrack
+
+    -- Ползунок
+    local slider = Instance.new("Frame")
+    slider.Name = "Slider"
+    slider.Size = UDim2.new(0, 20, 0, 20)
+    slider.Position = UDim2.new(0, 0, 0, 0) -- Начальная позиция: слева
+    slider.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- Начальное состояние: выключен
+    slider.BorderSizePixel = 0
+    slider.Parent = sliderTrack
+
+    -- Добавляем закругленные края для ползунка
+    local SliderCorner = Instance.new("UICorner")
+    SliderCorner.CornerRadius = UDim.new(0, 10) -- Закругление на 10 пикселей
+    SliderCorner.Parent = slider
+
+    -- Логика переключения
+    toggleButton.MouseButton1Click:Connect(function()
+        if slider.Position.X.Offset == 0 then
+            -- Переключаем на включенное состояние
+            slider:TweenPosition(UDim2.new(1, -20, 0, 0), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.2, true)
+            slider.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- Зеленый цвет для включенного состояния
+        else
+            -- Переключаем на выключенное состояние
+            slider:TweenPosition(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.2, true)
+            slider.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        end
+    end)
+end
+
+-- Создаем три переключателя
+createToggleButton(MainFrame, "Freeze Trade", 45) -- Первый переключатель
+createToggleButton(MainFrame, "Auto Accept", 85) -- Второй переключатель
+createToggleButton(MainFrame, "Auto Add Items", 125) -- Третий переключатель
+
+-- Добавляем GUI на CoreGui (для Block Fruit)
+ScreenGui.Parent = game:GetService("CoreGui")
